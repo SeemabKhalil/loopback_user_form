@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags always come first -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
+
+  <style>
+    #CreatingFrom {
+      padding: 200px;
+
+    }
+
+    #reg {
+      border-bottom: 3px solid black;
+    }
+
+    #n1 {
+      border-bottom: 2px solid black;
+    }
+  </style>
+</head>
+
+<body id="b1">
+  <!-- Orignial Form data -->
+  <div class="container">
+    <h1 class="text-center text-danger pb-3" id="reg">USER LIST</h1>
+    <table id="mytable" class="table table-bordred table-striped ">
+      <thead>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Gender</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <tfoot>
+      <button type="button" class="btn btn-danger  btn-block btn-sm" id="signIn" data-toggle="modal" data-target="#ModelName" aria-hidden="true"
+        value="submit">
+        Add New
+      </button>
+
+    </tfoot>
+  </div>
+
+  <div class="modal fade" id="ModelName" tabindex="-1" role="dialog" aria-labelledby="ModelNameLabel" aria=hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h2 class="form-signin-heading text-center text-success">USER FORM</h2>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+
+        </div>
+        <div class="modal-body">
+          <div class="container">
+
+            <form class="form-signin" id="signInForm">
+
+              <label for="inputname" class="sr-only">First Name</label>
+              <input type="text" id="firstName" name="firstName" class="form-control mb-2" placeholder="Enter Name" required autofocus>
+              <label for="inputname" class="sr-only">Last Name</label>
+              <input type="text" id="lastName" name="lastName" class="form-control mb-2" placeholder="Last Name" required autofocus>
+
+
+              <div class="radio">
+                <label>
+                  <input type="radio" value="Male" id="gender" name="gender" class="mr-2">Male
+                </label>
+                <label>
+                  <input type="radio" value="Femele" id="gender" name="gender" class="mr-2">Femele
+                </label>
+              </div>
+              <button class="btn btn-lg btn-primary btn-block btn-success mt-3" type="submit">SAVE</button>
+            </form>
+
+          </div>
+          <!-- /container -->
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery first, then Bootstrap JS. -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+
+
+
+  <script>
+    // For Get  
+    $("#document").ready(function () {
+      $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/api/teacher",
+        contentType: "application/json",
+        Accept: "application/json",
+        error: function () {
+          alert("Error");
+        },
+        success: function (response) {
+          console.log(response);
+          var trHTML = '';
+          $.each(response, function (i, item) {
+            trHTML += '<tr><td>' + item.id + '</td><td>' + item.firstName + '</td><td>' + item.lastName + '</td><td>' + item.gender + '</td><td>' + '<button type="button" ' + '" onClick="edit(' + item.id + ')" class="btn btn-success btn-sm editButton" data-toggle="modal" data-target="#ModelName" value = "submit" >Edit</button > ' + '</td><td>' + '<button type="button" ' + '" onClick="deleteData(' + item.id + ')" class="btn btn-danger btn-sm deleteButton"   value = "submit" >Delete</button > ' + '</td ></tr > ';
+          });
+          $('#mytable').append(trHTML);
+        }
+      });
+    });
+
+    // For post
+    $("#signIn").click(function () {
+      $("#firstName").val("");
+      $("#lastName").val("");
+      document.getElementById("gender").checked = false;
+      $("#signInForm").submit(function () {
+        var firstName = $("#firstName").val();
+        var lastname = $("#lastName").val();
+        var gender = $('input[name=gender]:checked').val();
+        var fromValue = JSON.stringify({ "firstName": firstName, "lastName": lastname, "gender": gender });
+        console.log(fromValue);
+
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:3000/api/teacher",
+          contentType: "application/json",
+          data: fromValue,
+          error: function () {
+            alert("Error");
+          },
+          success: function () {
+            // alert("success");
+          }
+        });
+      });
+    });
+    // put Data
+    function edit(user_id) {
+      // Code 
+      // For defult values
+      $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/api/teacher/" + user_id,
+        contentType: "application/json",
+        Accept: "application/json",
+        error: function () {
+          alert("Error");
+        },
+        success: function (response) {
+          console.log(response);
+          // document.getElementById("#firstName"). = response.firstName;
+          $("#firstName").val(response.firstName);
+          $("#lastName").val(response.lastName);
+          document.getElementById("gender").checked = true;
+        }
+      });
+
+      $("#signInForm").submit(function () {
+        var firstName = $("#firstName").val();
+        var lastname = $("#lastName").val();
+        var gender = $('input[name=gender]:checked').val();
+        var fromValue = JSON.stringify({ "firstName": firstName, "lastName": lastname, "gender": gender });
+        console.log(fromValue);
+
+        $.ajax({
+          type: "PUT",
+          url: "http://localhost:3000/api/teacher/" + user_id,
+          contentType: "application/json",
+          Accept: "application/json",
+          data: fromValue,
+          error: function () {
+            alert("Error");
+          },
+          success: function () {
+            // alert("success");
+          }
+
+        });
+      });
+
+
+    }
+    // For Delete
+    function deleteData(user_id) {
+
+      if (confirm('Do you want to continue ?')) {
+        console.log("delete");
+        $.ajax({
+          type: "DELETE",
+          url: "http://localhost:3000/api/teacher/" + user_id,
+          contentType: "application/json",
+          Accept: "application/json",
+          error: function () {
+            alert("Error");
+          },
+          success: function (response) {
+            console.log(response);
+            window.location = "http://localhost:3000";
+          }
+
+        });
+        // window.prompt('Do you want to continue ? ');
+
+      } else {
+        alert("not deleted");
+
+        // Do nothing!
+      }
+
+    }
+
+
+
+
+  </script>
+
+</body>
+
+</html>
